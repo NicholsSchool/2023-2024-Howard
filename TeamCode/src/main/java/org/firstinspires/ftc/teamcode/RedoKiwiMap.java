@@ -118,7 +118,7 @@ public class RedoKiwiMap implements Constants {
             return Constants.STRAIGHTEN_LIMITER * (Math.sin(Math.toRadians(0.5 * difference + 45.0)));
         else if( difference < -90.0 )
             return Constants.STRAIGHTEN_LIMITER * (Math.sin(Math.toRadians(0.5 * difference - 45.0)));
-        return Constants.STRAIGHTEN_LIMITER * (Math.sin(Math.toRadians(desiredAngle - getHeading())));
+        return Constants.STRAIGHTEN_LIMITER * (Math.sin(Math.toRadians(difference)));
     }
 
     /**

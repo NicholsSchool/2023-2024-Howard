@@ -30,16 +30,16 @@ public interface Constants {
     public static final double INCHES_PER_TICK = WHEEL_DIAMETER_INCHES * Math.PI / TICKS_PER_REV;
 
     /** Maximum power that our code applies to a motor */
-    public static final double OVERALL_LIMITER = 0.85;
+    public static final double OVERALL_LIMITER = 0.9;
 
     /** Multiplier for joystick inputted turn speed */
-    public static final double TURN_LIMITER = 0.4;
+    public static final double TURN_LIMITER = 0.45;
 
-    /** Multiplier for automatic correction turn speed */
-    public static final double STRAIGHTEN_LIMITER = 0.75;
+    /** Multiplier for automatic correction speed */
+    public static final double CORRECT_LIMITER = 0.7;
 
     /** The threshold minimum value of error for autoAlignment to occur in degrees */
-    public static final double ANGLE_THRESHOLD = 0.15;
+    public static final double ANGLE_THRESHOLD = 0.3;
 }
 
 

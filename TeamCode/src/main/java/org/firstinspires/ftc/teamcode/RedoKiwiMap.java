@@ -114,17 +114,17 @@ public class RedoKiwiMap implements Constants {
     public double headingCorrect(double desiredAngle)
     {
         double difference = desiredAngle - getHeading();
-        if( difference < -180 )
-            difference += 360;
-        else if( difference >= 180 )
-            difference -= 360;
+        if( difference < -180.0 )
+            difference += 360.0;
+        else if( difference >= 180.0 )
+            difference -= 360.0;
+
         if( Math.abs(difference) < Constants.ANGLE_THRESHOLD )
             return 0.0;
-        else if( difference > 90.0)
-            return Constants.STRAIGHTEN_LIMITER * (Math.sin(Math.toRadians(0.5 * difference + 45.0)));
-        else if( difference < -90.0 )
-            return Constants.STRAIGHTEN_LIMITER * (Math.sin(Math.toRadians(0.5 * difference - 45.0)));
-        return Constants.STRAIGHTEN_LIMITER * (Math.sin(Math.toRadians(difference)));
+        else if( difference >= 0.0 )
+            return Constants.CORRECT_LIMITER * Math.pow(Math.sin(Math.toRadians(0.5 * difference)), 3.0/5);
+        else
+            return Constants.CORRECT_LIMITER * -Math.pow(Math.sin(Math.toRadians(0.5 * difference - 180.0)), 3.0/5);
     }
 
     /**
@@ -161,8 +161,8 @@ public class RedoKiwiMap implements Constants {
         double thisY = (leftMotor.getCurrentPosition() - rightMotor.getCurrentPosition()) * Constants.INCHES_PER_TICK / 2.0;
         double heading  = this.getHeading();
 
-        x += thisX * Math.cos(Math.toRadians(heading)) + thisY * Math.cos(Math.toRadians(heading));
-        y += thisX * Math.sin(Math.toRadians(heading)) + thisY * Math.sin(Math.toRadians(heading));
+        x += thisX * Math.sin(Math.toRadians(heading)) + thisY * Math.sin(Math.toRadians(heading));
+        y += thisX * Math.cos(Math.toRadians(heading)) + thisY * Math.cos(Math.toRadians(heading));
 
         leftMotor.resetEncoder();
         rightMotor.resetEncoder();

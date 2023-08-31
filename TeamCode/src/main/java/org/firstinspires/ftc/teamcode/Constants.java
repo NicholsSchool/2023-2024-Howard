@@ -30,7 +30,7 @@ public interface Constants {
     public static final double INCHES_PER_TICK = WHEEL_DIAMETER_INCHES * Math.PI / TICKS_PER_REV;
 
     /** Maximum power that our code applies to a motor */
-    public static final double OVERALL_LIMITER = 0.8;
+    public static final double OVERALL_LIMITER = 0.85;
 
     /** Multiplier for joystick inputted turn speed */
     public static final double TURN_LIMITER = 0.4;

@@ -21,6 +21,8 @@ public class RedoKiwiMap implements Constants {
     private MotorEx leftMotor;
     private MotorEx rightMotor;
     private MotorEx backMotor;
+    private double x;
+    private double y;
 
     /**
      * Initialize the RobotMap
@@ -78,13 +80,17 @@ public class RedoKiwiMap implements Constants {
         leftMotor.motorEx.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         rightMotor.motorEx.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         backMotor.motorEx.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+
+        // Initialize Variables
+        x = 0.0;
+        y = 0.0;
     }
 
     /**
      * Drives the robot field oriented
      *
      * @param power The speed of the Robot [-1.0, 1.0]
-     * @param angle the angle the robot drives at
+     * @param angle the angle the robot drives at, forward is 180 since y is inverted
      * @param turn the turn speed of the Robot [-1.0, 1.0]
      * @param autoAlign whether to correct the robot's heading
      * @param desiredAngle what angle to correct to
@@ -129,6 +135,48 @@ public class RedoKiwiMap implements Constants {
     public double getHeading()
     {
         return -imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+    }
+
+//    /**
+//     * Returns the Coordinates of the Robot assuming no turning
+//     *
+//     * @return the X and Y Coordinates Relative to the Robot
+//     */
+//    public double[] getXYRelative()
+//    {
+//        double back = backMotor.getCurrentPosition() * Constants.INCHES_PER_TICK;
+//        double left = leftMotor.getCurrentPosition() * Constants.INCHES_PER_TICK;
+//        double right = rightMotor.getCurrentPosition() * Constants.INCHES_PER_TICK;
+//
+//        return new double[]{-back, (left-right)/2.0};
+//    }
+
+    /**
+     * Adds the robot's movements to its stored coordinates, works with spinning
+     * Call with every cycle of the loop
+     */
+    public void updateXY()
+    {
+        double thisX = -backMotor.getCurrentPosition() * Constants.INCHES_PER_TICK;
+        double thisY = (leftMotor.getCurrentPosition() - rightMotor.getCurrentPosition()) * Constants.INCHES_PER_TICK / 2.0;
+        double heading  = this.getHeading();
+
+        x += thisX * Math.cos(Math.toRadians(heading)) + thisY * Math.cos(Math.toRadians(heading));
+        y += thisX * Math.sin(Math.toRadians(heading)) + thisY * Math.sin(Math.toRadians(heading));
+
+        leftMotor.resetEncoder();
+        rightMotor.resetEncoder();
+        backMotor.resetEncoder();
+    }
+
+    /**
+     * Return the coordinates of the bot
+     *
+     * @return the X and Y values relative to its starting position
+     */
+    public double[] getXY()
+    {
+        return new double[]{x, y};
     }
 }
 

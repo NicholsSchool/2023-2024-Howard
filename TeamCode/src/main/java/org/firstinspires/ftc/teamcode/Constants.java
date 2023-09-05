@@ -38,6 +38,12 @@ public interface Constants {
     /** Multiplier for automatic correction speed */
     public static final double CORRECT_LIMITER = 0.7;
 
+    /** The threshold minimum value of error for goToPosition in inches */
+    public static final double POSITION_THRESHOLD = 0.25;
+
+    /** The P value for goToPosition */
+    public static final double P_P = 0.1;
+
     /** The threshold minimum value of error for autoAlignment to occur in degrees */
     public static final double ANGLE_THRESHOLD = 0.3;
 }

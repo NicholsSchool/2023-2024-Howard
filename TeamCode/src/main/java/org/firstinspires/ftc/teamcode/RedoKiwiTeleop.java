@@ -107,40 +107,41 @@ public class RedoKiwiTeleop extends OpMode implements Constants
         if(gamepad.isDown(GamepadKeys.Button.DPAD_UP) )
         {
             angle = 180.0;
-            power = 0.75;
+            power = 0.5;
         }
         else if(gamepad.isDown(GamepadKeys.Button.DPAD_DOWN) )
         {
             angle = 0.0;
-            power = 0.75;
+            power = 0.5;
         }
         else if(gamepad.isDown(GamepadKeys.Button.DPAD_RIGHT) )
         {
             angle = 90.0;
-            power = 0.75;
+            power = 0.5;
         }
         else if(gamepad.isDown(GamepadKeys.Button.DPAD_LEFT) )
         {
             angle = -90.0;
-            power = 0.75;
+            power = 0.5;
         }
 
-        robot.drive(power, angle, currentTurn, autoAlign, desiredAngle);
-        robot.updateXY();
+        if(gamepad.isDown(GamepadKeys.Button.START))
+            robot.goToPosition(new double[]{0.0, 0.0}, autoAlign, desiredAngle);
+        else
+            robot.drive(power, angle, currentTurn, autoAlign, desiredAngle);
 
         lastTurn = currentTurn;
 
         // Show Telemetry
         double[] xy = robot.getXY();
+        double[] pidf = robot.getPIDFCoeffs();
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         telemetry.addData("Robot Heading", robot.getHeading());
         telemetry.addData("Desired Heading", desiredAngle);
         telemetry.addData("Input Theta", angle);
         telemetry.addData("AutoAlign", autoAlign);
-
         telemetry.addData("X", xy[0]);
         telemetry.addData("Y", xy[1]);
-
     }
 
     /*

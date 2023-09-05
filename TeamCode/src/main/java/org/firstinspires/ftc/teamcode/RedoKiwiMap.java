@@ -3,9 +3,11 @@ package org.firstinspires.ftc.teamcode;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.hardware.bosch.BHI260IMU;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
@@ -21,8 +23,6 @@ public class RedoKiwiMap implements Constants {
     private MotorEx leftMotor;
     private MotorEx rightMotor;
     private MotorEx backMotor;
-    private double x;
-    private double y;
 
     /**
      * Initialize the RobotMap
@@ -81,9 +81,10 @@ public class RedoKiwiMap implements Constants {
         rightMotor.motorEx.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         backMotor.motorEx.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
-        // Initialize Variables
-        x = 0.0;
-        y = 0.0;
+        // Set internal DCMotorEx PIDF Coefficients
+        leftMotor.motorEx.setVelocityPIDFCoefficients(2.0, 3.0, 0.0, 0.0);
+        rightMotor.motorEx.setVelocityPIDFCoefficients(2.0, 3.0, 0.0, 0.0);
+        backMotor.motorEx.setVelocityPIDFCoefficients(2.0, 3.0, 0.0, 0.0);
     }
 
     /**
@@ -104,6 +105,31 @@ public class RedoKiwiMap implements Constants {
         leftMotor.set(turn + (driveCoeff * power * Math.sin(Math.toRadians(angle + Constants.LEFT_ANGLE + getHeading()))));
         rightMotor.set(turn + (driveCoeff * power * Math.sin(Math.toRadians(angle + Constants.RIGHT_ANGLE + getHeading()))));
         backMotor.set(turn + (driveCoeff * power * Math.sin((Math.toRadians(angle + Constants.BACK_ANGLE + getHeading())))));
+    }
+
+    /**
+     * Goes to coordinates relative to its starting position
+     *
+     * @param coordinates the x and y of the robot
+     */
+    public void goToPosition(double[] coordinates, boolean autoAlign, double desiredAngle)
+    {
+        double[] xy = this.getXY();
+        double dist = Math.sqrt(Math.pow(coordinates[0] - xy[0], 2 ) + Math.pow(coordinates[1] - xy[1], 2) );
+        double theta = Math.toDegrees(Math.atan2(-(coordinates[1] - xy[1]), -(coordinates[0] - xy[0]))) - 90.0;
+        double power = dist * Constants.P_P;
+
+        if( power > 1.0 )
+            power = 1.0;
+        else if( power < -1.0 )
+            power = -1.0;
+
+        if( dist <= Constants.POSITION_THRESHOLD)
+            this.drive(0.0, theta, 0.0, autoAlign, desiredAngle);
+        else
+            this.drive(power, theta, 0.0, autoAlign, desiredAngle);
+
+
     }
 
     /**
@@ -137,46 +163,24 @@ public class RedoKiwiMap implements Constants {
         return -imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
     }
 
-//    /**
-//     * Returns the Coordinates of the Robot assuming no turning
-//     *
-//     * @return the X and Y Coordinates Relative to the Robot
-//     */
-//    public double[] getXYRelative()
-//    {
-//        double back = backMotor.getCurrentPosition() * Constants.INCHES_PER_TICK;
-//        double left = leftMotor.getCurrentPosition() * Constants.INCHES_PER_TICK;
-//        double right = rightMotor.getCurrentPosition() * Constants.INCHES_PER_TICK;
-//
-//        return new double[]{-back, (left-right)/2.0};
-//    }
-
     /**
-     * Adds the robot's movements to its stored coordinates, works with spinning
-     * Call with every cycle of the loop
-     */
-    public void updateXY()
-    {
-        double thisX = -backMotor.getCurrentPosition() * Constants.INCHES_PER_TICK;
-        double thisY = (leftMotor.getCurrentPosition() - rightMotor.getCurrentPosition()) * Constants.INCHES_PER_TICK / 2.0;
-        double heading  = this.getHeading();
-
-        x += thisX * Math.sin(Math.toRadians(heading)) + thisY * Math.sin(Math.toRadians(heading));
-        y += thisX * Math.cos(Math.toRadians(heading)) + thisY * Math.cos(Math.toRadians(heading));
-
-        leftMotor.resetEncoder();
-        rightMotor.resetEncoder();
-        backMotor.resetEncoder();
-    }
-
-    /**
-     * Return the coordinates of the bot
+     * Return the coordinates of the bot, assuming the robot's heading is constant
      *
      * @return the X and Y values relative to its starting position
      */
     public double[] getXY()
     {
-        return new double[]{x, y};
+        double back = backMotor.getCurrentPosition() * Constants.INCHES_PER_TICK;
+        double left = leftMotor.getCurrentPosition() * Constants.INCHES_PER_TICK;
+        double right = rightMotor.getCurrentPosition() * Constants.INCHES_PER_TICK;
+
+        return new double[]{-back, (left-right)/Math.sqrt(3.0)};
+    }
+
+    public double[] getPIDFCoeffs()
+    {
+        PIDFCoefficients coeffs = leftMotor.motorEx.getPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        return new double[]{coeffs.p, coeffs.i, coeffs.d, coeffs.f};
     }
 }
 
